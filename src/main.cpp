@@ -312,8 +312,14 @@ struct CefWrapper
 
 	void kill_all()
 	{
+		const auto v = tabs_->count;
+		log_message("Kill all: %d", v);
+		if (v == -2) 
+		{
+			std::quick_exit(0);
+			log_message("Killed?");
+		}
 		windows_.clear();
-		if (tabs_->count == -2) _exit(0);
 		Sleep(100);
 	}
 
@@ -343,6 +349,7 @@ struct CefWrapper
 		timeBeginPeriod(1U);
 		while (tabs_->count >= 0)
 		{
+			// log_message("count: %d", tabs_->count);
 			frame();
 			const auto timeout = verify_performance(target_frame_time_ms);
 			if (timeout < 4)
@@ -353,6 +360,7 @@ struct CefWrapper
 			Sleep(std::max(4, timeout));
 			const auto c1 = time_now_ms() - t1;
 			ctime_sleep_ += c1;
+			// log_message("count (end): %d", tabs_->count);
 		}
 		kill_all();
 	}
@@ -397,7 +405,7 @@ int main()
 	if (filename.empty())
 	{
 		std::cout << "Assetto Corsa CEF\n"
-			"v103.0.5060.136\n\n"
+			"v103.0.5060.137\n\n"
 			"Wraps around Chromium engine allowing Lua scripts in Assetto Corsa to\n"
 			"load and render web pages. Based on OBS fork of Chromium Embedded\n"
 			"Framework.\n\n"

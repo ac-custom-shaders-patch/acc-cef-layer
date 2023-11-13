@@ -246,7 +246,7 @@ namespace d3d11
 			if (FAILED(hr))
 			{
 				std::cout << "Failed to create named handle: 0x" << std::hex << hr;
-				_exit(11);
+				std::quick_exit(11);
 			}
 		}
 	}

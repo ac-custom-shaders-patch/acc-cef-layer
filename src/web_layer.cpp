@@ -352,7 +352,7 @@ struct WebApp : CefApp, CefBrowserProcessHandler, CefRenderProcessHandler
 	{
 		if (message->GetName() == PMSG_KILL)
 		{
-			_exit(1);
+			std::quick_exit(1);
 		}
 		if (message->GetName() == PMSG_RECEIVE_IN)
 		{
@@ -522,7 +522,7 @@ struct FrameBuffer
 			if (!shared_buffer_)
 			{
 				std::cerr << "Failed to open shared texture" << std::endl;
-				_exit(20);
+				std::quick_exit(20);
 			}
 		}
 		dirty_ = true;
@@ -2168,7 +2168,7 @@ public:
 		}
 		else if (++crash_counter > 7) // 8 crashes in a half a minute
 		{
-			_exit(29);
+			std::quick_exit(29);
 		}
 
 		browser->Reload();
