@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 	<assemblyIdentity 
-		version="103.0.5060.137" 
+		version="103.0.5060.138" 
 		processorArchitecture="*" 
 		name="ac-cef-layer.exe" 
 		type="win32"/>

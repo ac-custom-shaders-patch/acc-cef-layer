@@ -233,13 +233,23 @@ struct CefWrapper
 		start_time_ = time_now_ms();
 	}
 
+	void suggest_cef_frame()
+	{		
+		const auto t1 = time_now_ms();
+		cef_step();
+		ctime_cef_ += time_now_ms() - t1;
+	}
+
 	void frame()
 	{
+		suggest_cef_frame();
+
 		const auto t0 = time_now_ms();
 		if (tabs_->count != FLAG_WRITING_TABS)
 		{
 			for (auto i = 0; i < tabs_->count; ++i)
 			{				
+				suggest_cef_frame();
 				if (auto f = windows_.find(tabs_->tabs[i]); f != windows_.end())
 				{
 					f->second->last_frame = frames_;
@@ -266,6 +276,7 @@ struct CefWrapper
 		auto needs_flush = false;
 		for (auto i = windows_.begin(); i != windows_.end();)
 		{
+			suggest_cef_frame();
 			if (i->second->last_frame == frames_)
 			{
 				i->second->update();
@@ -284,25 +295,23 @@ struct CefWrapper
 
 		if (needs_flush || frames_ % 512 == 0)
 		{
+			suggest_cef_frame();
 			device_.immedidate_context().flush();
 		}
 
 		++frames_;
-		const auto c0 = time_now_ms() - t0;
-		const auto t1 = time_now_ms();
-		cef_step();
-		const auto c1 = time_now_ms() - t1;
+		ctime_app_ += time_now_ms() - t0;
+		
+		suggest_cef_frame();
 
-		ctime_app_ += c0;
-		ctime_cef_ += c1;
 	}
 
 	int verify_performance(double target_frame_time_ms)
 	{
 		const auto expected_time_ms = double(frames_) * target_frame_time_ms;
 		const auto actual_time_ms = time_now_ms() - start_time_;
-		const auto timeout = 16 + int(round(expected_time_ms - actual_time_ms));
-		if (frames_ % 4096 == 0)
+		const auto timeout = int(target_frame_time_ms) + int(round(expected_time_ms - actual_time_ms));
+		if (frames_ % 1024 == 0)
 		{
 			log_message("CEF: frames=%d, avg. frame time=%.2f ms, timeout=%d ms, frame times=[ app=%.2f ms, cef=%.2f ms, sleep=%.2f ms ]", frames_,
 				actual_time_ms / double(frames_), timeout, ctime_app_ / double(frames_), ctime_cef_ / double(frames_), ctime_sleep_ / double(frames_));
@@ -346,6 +355,7 @@ struct CefWrapper
 
 	void run_sleep(double target_frame_time_ms)
 	{
+		log_message("run_sleep(): %.2f ms per frame", target_frame_time_ms);
 		timeBeginPeriod(1U);
 		while (tabs_->count >= 0)
 		{
@@ -405,7 +415,7 @@ int main()
 	if (filename.empty())
 	{
 		std::cout << "Assetto Corsa CEF\n"
-			"v103.0.5060.137\n\n"
+			"v103.0.5060.138\n\n"
 			"Wraps around Chromium engine allowing Lua scripts in Assetto Corsa to\n"
 			"load and render web pages. Based on OBS fork of Chromium Embedded\n"
 			"Framework.\n\n"
